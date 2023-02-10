@@ -53,7 +53,9 @@ usersRouter.get(
       if (accom.length >= 1) {
         res.send(accom);
       }
-    } catch (err) {}
+    } catch (err) {
+      next(err);
+    }
   }
 );
 

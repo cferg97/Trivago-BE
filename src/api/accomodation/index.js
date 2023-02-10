@@ -58,17 +58,64 @@ accomRouter.put(
   async (req, res, next) => {
     try {
       const accom = await accomModel.findOne({ _id: req.params.id });
-      if (req.user._id === accom.host.toString()) {
-        await accomModel.findByIdAndUpdate(req.params.id, req.body, {
-          new: true,
-          runValidators: true,
-        });
-        res.status(204).send();
+
+      if (accom) {
+        if (req.user._id === accom.host.toString()) {
+          await accomModel.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+          });
+          res.status(204).send();
+        } else {
+          next(
+            createHttpError(
+              403,
+              "You are not authorized to carry out this action."
+            )
+          );
+        }
+      } else {
+        next(
+          createHttpError(
+            40,
+            `Accomodation with ID ${req.params.id} not found.`
+          )
+        );
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+accomRouter.delete(
+  "/:id",
+  JWTAuthMiddleware,
+  HostOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      const accom = await accomModel.findOne({ _id: req.params.id });
+      if (accom) {
+        if (req.user._id === accom.host.toString()) {
+          const deletedAccom = await accomModel.findByIdAndDelete(
+            req.params.id
+          );
+          if (deletedAccom) {
+            res.status(204).send();
+          } else {
+            next(
+              createHttpError(
+                404,
+                `Accomodation not found with ID ${req.params.id}`
+              )
+            );
+          }
+        }
       } else {
         next(
           createHttpError(
             403,
-            "You are not authorized to carry out this action."
+            `You are not authorized to carry out this action.`
           )
         );
       }
