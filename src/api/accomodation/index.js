@@ -77,7 +77,7 @@ accomRouter.put(
       } else {
         next(
           createHttpError(
-            40,
+            404,
             `Accomodation with ID ${req.params.id} not found.`
           )
         );
