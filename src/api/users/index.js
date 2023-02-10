@@ -1,9 +1,11 @@
 import express from "express";
 import createHttpError from "http-errors";
 import usersModel from "./model.js";
+import accomModel from "../accomodation/model.js";
 import q2m from "query-to-mongo";
 import { createAccessToken } from "../../lib/auth/tools.js";
 import { JWTAuthMiddleware } from "../../lib/auth/jwtAuth.js";
+import { HostOnlyMiddleware } from "../../lib/auth/hostOnly.js";
 
 const usersRouter = express.Router();
 
@@ -35,13 +37,33 @@ usersRouter.post("/login", async (req, res, next) => {
   }
 });
 
+usersRouter.get(
+  "/me/accomodation",
+  JWTAuthMiddleware,
+  HostOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      const accom = await accomModel.find(
+        { host: req.user._id },
+        "-createdAt -updatedAt -__v -host"
+      );
+      if (accom.length === 0) {
+        next(createHttpError(404, "This user has no posted accomodation."));
+      }
+      if (accom.length >= 1) {
+        res.send(accom);
+      }
+    } catch (err) {}
+  }
+);
+
 usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
-    try{
-        const me = await usersModel.findById(req.user._id)
-        res.send(me)
-    }catch(err){
-        next(err)
-    }
-})
+  try {
+    const me = await usersModel.findById(req.user._id);
+    res.send(me);
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default usersRouter;

@@ -21,9 +21,9 @@ server.use(express.json());
 server.use("/users", usersRouter);
 server.use("/accomodation", accomRouter);
 
+server.use(badRequestHandler);
 server.use(unauthorizedError);
 server.use(forbiddenErrorHandler);
-server.use(badRequestHandler);
 server.use(notFoundHandler);
 server.use(genericErrorHandler);
 
