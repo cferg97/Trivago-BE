@@ -10,6 +10,7 @@ import {
   forbiddenErrorHandler,
 } from "./errorHandlers.js";
 import usersRouter from "./api/users/index.js";
+import accomRouter from "./api/accomodation/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -17,7 +18,8 @@ const port = process.env.PORT;
 server.use(cors());
 server.use(express.json());
 
-server.use("/users", usersRouter)
+server.use("/users", usersRouter);
+server.use("/accomodation", accomRouter);
 
 server.use(unauthorizedError);
 server.use(forbiddenErrorHandler);

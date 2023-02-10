@@ -27,11 +27,21 @@ usersRouter.post("/login", async (req, res, next) => {
       const payload = { _id: user._id, role: user.role };
       const accessToken = await createAccessToken(payload);
       res.send({ accessToken });
+    } else {
+      next(createHttpError(401, "Please check your credentials are correct"));
     }
-    else{
-        next(createHttpError(401, "Please check your credentials are correct"))
-    }
-  } catch (err) {}
+  } catch (err) {
+    next(err);
+  }
 });
+
+usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
+    try{
+        const me = await usersModel.findById(req.user._id)
+        res.send(me)
+    }catch(err){
+        next(err)
+    }
+})
 
 export default usersRouter;
